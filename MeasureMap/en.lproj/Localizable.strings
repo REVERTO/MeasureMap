@@ -1,0 +1,27 @@
+/* 
+  Localizable.strings
+  MeasureMap
+
+  Created by Tomoyuki Ito on 2012/11/11.
+  Copyright (c) 2012年 REVERTO. All rights reserved.
+*/
+
+//----- Button Labels -----
+"button.list" = "Distance";
+"button.clear" = "Clear";
+"button.current" = "Current";
+"button.close" = "Close";
+"button.search" = "Search";
+
+//----- Words -----
+"word.to" = "to";
+"word.total" = "Total";
+"word.locationInformaition" = "Location Information";
+"word.latitude" = "Latitude";
+"word.longitude" = "Longitude";
+
+//----- Messages -----
+"message.nopins" = "Please drop pins on the map";
+"message.search" = "Enter an address";
+"message.nolocation" = "Location information can not be obtained";
+"message.pinDelete" = "Delete this pin";

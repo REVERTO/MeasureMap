@@ -1,0 +1,27 @@
+/* 
+  Localizable.strings
+  MeasureMap
+
+  Created by Tomoyuki Ito on 2012/11/11.
+  Copyright (c) 2012年 REVERTO. All rights reserved.
+*/
+
+//----- Button Labels -----
+"button.list" = "距離";
+"button.clear" = "消去";
+"button.current" = "現在地";
+"button.close" = "閉じる";
+"button.search" = "検索";
+
+//----- Words -----
+"word.to" = "から";
+"word.total" = "合計";
+"word.locationInformaition" = "位置情報";
+"word.latitude" = "緯度";
+"word.longitude" = "経度";
+
+//----- Messages -----
+"message.nopins" = "地図上にピンをドロップしてください";
+"message.search" = "住所を入力";
+"message.nolocation" = "位置情報が取得できません";
+"message.pinDelete" = "このピンを削除する";

@@ -1,0 +1,26 @@
+//
+// Prefix header for all source files of the 'MeasureMap' target in the 'MeasureMap' project
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+#endif
+
+#ifdef DEBUG
+#define Log(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define Log(...)
+#endif
+
+#define GATrackEvent(event,action,label,value) [[[GAI sharedInstance] defaultTracker] trackEventWithCategory:event withAction:action withLabel:label withValue:value];
+
+#define kNOUpdateAnnotations    @"UpdateAnnotations"
+
+#import "UIViewController+MM.h"
