@@ -25,3 +25,4 @@
 "message.search" = "住所を入力";
 "message.nolocation" = "位置情報が取得できません";
 "message.pinDelete" = "このピンを削除する";
+"message.guidetrash" = "地図上にピンがあればこのボタンで削除することができます";

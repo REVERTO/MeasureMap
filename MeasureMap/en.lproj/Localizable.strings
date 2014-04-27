@@ -25,3 +25,4 @@
 "message.search" = "Enter an address";
 "message.nolocation" = "Location information can not be obtained";
 "message.pinDelete" = "Delete this pin";
+"message.guidetrash" = "If there are pins, you can remove all pins by this button.";

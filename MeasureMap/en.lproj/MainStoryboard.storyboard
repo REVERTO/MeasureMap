@@ -14,7 +14,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" id="ahK-Di-M8D">
-                                <rect key="frame" x="0.0" y="70" width="320" height="498"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="518"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outlet property="delegate" destination="2" id="cEq-H8-hfk"/>
@@ -22,7 +22,7 @@
                                 </connections>
                             </mapView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="WAg-iv-TtV">
-                                <rect key="frame" x="0.0" y="472" width="320" height="44"/>
+                                <rect key="frame" x="0.0" y="474" width="320" height="44"/>
                                 <items>
                                     <barButtonItem image="list.png" style="plain" id="PMe-qX-YUb">
                                         <connections>
@@ -31,6 +31,7 @@
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Fsr-PP-Hei"/>
                                     <barButtonItem image="trash.png" style="plain" id="TwX-ut-XT2">
+                                        <color key="tintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>
                                             <action selector="clearDidPush:" destination="2" id="7E1-aT-vor"/>
                                         </connections>
@@ -268,7 +269,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="kFz-hE-bdc">
-                                <rect key="frame" x="0.0" y="64" width="320" height="504"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <connections>
                                     <outlet property="dataSource" destination="q3X-kO-Zwp" id="Xdd-ea-dqt"/>

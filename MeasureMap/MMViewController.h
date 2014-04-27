@@ -10,6 +10,7 @@
 #import <MapKit/MapKit.h>
 #import <iAd/iAd.h>
 #import "GAI.h"
+#import <iToast.h>
 
 @interface MMViewController : GAITrackedViewController
 <ADBannerViewDelegate, UITableViewDataSource, UITableViewDataSource,CLLocationManagerDelegate, UISplitViewControllerDelegate>

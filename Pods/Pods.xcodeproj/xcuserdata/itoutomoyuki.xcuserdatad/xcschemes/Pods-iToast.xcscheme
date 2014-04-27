@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DBB4B35A1AAB45CC8CD2E5D7"
-               BuildableName = "libPods-GoogleAnalytics-iOS-SDK.a"
-               BlueprintName = "Pods-GoogleAnalytics-iOS-SDK"
+               BlueprintIdentifier = "59B241E58C4C4F23905FBC9D"
+               BuildableName = "libPods-iToast.a"
+               BlueprintName = "Pods-iToast"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

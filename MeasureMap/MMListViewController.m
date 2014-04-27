@@ -47,6 +47,8 @@
     _closeButton.title = NSLocalizedString(@"button.close", nil);
     
     [self calcDistance];
+    
+    self.tableView.sectionHeaderHeight = 20;
 }
 
 - (void)updateAnnotations:(NSNotification *)notification
@@ -62,7 +64,7 @@
     _totalDistance = 0.0;
     _navigationBar.topItem.title = @"";
     
-    int cellNumber = _annotations.count - 1;
+    NSInteger cellNumber = _annotations.count - 1;
     if (cellNumber > 0) {
         for (int loopCount = 0; loopCount < cellNumber; loopCount++) {
             NSInteger fromPinNumber = loopCount + 1;
@@ -73,7 +75,7 @@
             CLLocation *toLocation = [[CLLocation alloc] initWithLatitude:toAnnotation.coordinate.latitude
                                                                 longitude:toAnnotation.coordinate.longitude];
             CLLocationDistance distance = [toLocation distanceFromLocation:fromLocation];
-            NSMutableString *cellText = [NSMutableString stringWithFormat:@"No.%d %@ No.%d", fromPinNumber, NSLocalizedString(@"word.to", nil), (fromPinNumber + 1)];
+            NSMutableString *cellText = [NSMutableString stringWithFormat:@"No.%ld %@ No.%ld", fromPinNumber, NSLocalizedString(@"word.to", nil), (fromPinNumber + 1)];
             [_cellTexts addObject:cellText];
             
             if (distance < 1000) {
@@ -99,7 +101,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - UITableViewDelegate
+#pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -135,6 +137,13 @@
     }
     
     return cell;
+}
+
+#pragma mark - UITableViewDataSource
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    return [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
 }
 
 #pragma mark - IBAction

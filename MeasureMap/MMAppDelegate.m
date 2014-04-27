@@ -10,6 +10,7 @@
 #import "GAI.h"
 #import "MMViewController.h"
 #import "MMLocationInformationViewController.h"
+#import <iToast.h>
 
 @implementation MMAppDelegate
 
@@ -23,6 +24,11 @@
 #endif
     [[GAI sharedInstance] trackerWithTrackingId:@"UA-37381910-1"];
     [[GAI sharedInstance] defaultTracker];
+    
+    // iToast setting.
+    iToastSettings *ts = [iToastSettings getSharedSettings];
+    ts.gravity = iToastGravityCenter;
+    ts.duration = 2000;
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];

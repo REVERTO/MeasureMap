@@ -12,6 +12,21 @@
 #import "MMAppDelegate.h"
 #import "MMCalloutButton.h"
 
+static BOOL _statusbarHidden;
+
+@interface JASidePanelController (Stsbar)
+
+@end
+
+@implementation JASidePanelController (Stsbar)
+
+- (BOOL)prefersStatusBarHidden
+{
+    return _statusbarHidden;
+}
+
+@end
+
 @interface MMViewController ()
 {
     NSMutableArray *_annotations;
@@ -21,10 +36,10 @@
     BOOL _isSearchLoading;
     BOOL _hasSerachError;
     NSArray *_toolBarItems;
-    UIColor *_buttonDefaultColor;
     MKPointAnnotation *_disclosedAnnotation;
 }
 
+// UI
 @property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *listButton;
@@ -33,10 +48,9 @@
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *currentButton;
 @property (weak, nonatomic) IBOutlet ADBannerView *bannerView;
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
-//@property (strong, nonatomic) IBOutlet UISearchDisplayController *searchDisplayController;
 
+// controller
 @property (strong, nonatomic) CLLocationManager *locationManager;
-
 @property (strong, nonatomic) UISplitViewController *splitViewController;
 @property (strong, nonatomic) UIPopoverController *popover;
 @property (strong, nonatomic) UIPopoverController *locationPopover;
@@ -53,20 +67,15 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    
     self.screenName = NSStringFromClass([self class]);
     _annotations = [NSMutableArray array];
     _isFirst = YES;
     
-    // Change button label.
-    _listButton.title = NSLocalizedString(@"button.list", nil);
-    _clearButton.title = NSLocalizedString(@"button.clear", nil);
-    _currentButton.title = NSLocalizedString(@"button.current", nil);
-    _searchButton.title = NSLocalizedString(@"button.search", nil);
-    
-    _clearButton.enabled = NO;
+    _clearButton.tintColor = [UIColor lightGrayColor];
+    _currentButton.tintColor = [UIColor lightGrayColor];
     _searchBar.placeholder = NSLocalizedString(@"message.search", nil);
-    _buttonDefaultColor = _currentButton.tintColor;
+    _searchBar.tintColor = [UIColor whiteColor];
     
     if ([self.parentViewController isKindOfClass:[UISplitViewController class]]) {
         self.splitViewController = (UISplitViewController *)self.parentViewController;
@@ -103,8 +112,6 @@
     [super viewDidAppear:animated];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-//        _searchButton.tintColor = [UIColor blackColor];
-        _searchButton.tintColor = _buttonDefaultColor;
         CGRect rect;
         rect = _searchBar.frame;
         rect.origin.y -= _searchBar.frame.size.height;
@@ -137,7 +144,7 @@
     }
 }
 
-#pragma mark - Action Event
+#pragma mark - Action
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
@@ -163,8 +170,7 @@
     GATrackEvent(@"ButtonTap",@"CurrentTap",nil,nil);
     if (_mapView.showsUserLocation) {
         _mapView.showsUserLocation = NO;
-//        _currentButton.tintColor = [UIColor blackColor];
-        _currentButton.tintColor = _buttonDefaultColor;
+        _currentButton.tintColor = [UIColor lightGrayColor];
     }
     else {
         [self.locationManager startUpdatingLocation];
@@ -174,8 +180,13 @@
 - (IBAction)searchDidPush:(id)sender
 {
     GATrackEvent(@"ButtonTap",@"SearchTap",nil,nil);
+    
+    if (OsVersionMoreThan(@"7.0")) {
+        _statusbarHidden = YES;
+        [self setNeedsStatusBarAppearanceUpdate];
+    }
+    
     [UIView animateWithDuration:0.3 animations:^{
-        _searchButton.tintColor = [UIColor blueColor];
         CGRect rect;
         rect = _searchBar.frame;
         rect.origin.y = 0;
@@ -188,20 +199,26 @@
 - (IBAction)clearDidPush:(UIBarButtonItem *)barButtonItem
 {
     GATrackEvent(@"ButtonTap",@"ClearTap",nil,nil);
-    [_mapView removeAnnotations:_annotations];
-    _annotations = [NSMutableArray array];
-    [_mapView removeOverlays:_mapView.overlays];
-    _clearButton.enabled = NO;
     
-    // 更新通知を送信
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations", nil];
-    [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+    if (_annotations.count > 0) {
+        [_mapView removeAnnotations:_annotations];
+        _annotations = [NSMutableArray array];
+        [_mapView removeOverlays:_mapView.overlays];
+        _clearButton.tintColor = [UIColor lightGrayColor];
+        
+        // 更新通知を送信
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations", nil];
+        [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+    }
+    else {
+        [[iToast makeText:NSLocalizedString(@"message.guidetrash", nil)] show];
+    }
 }
 
 - (IBAction)didLongPressByRecognaizer:(UILongPressGestureRecognizer *)recognizer
 {
-    NSLog(@"%s : %d",__FUNCTION__, recognizer.state);
+    NSLog(@"%s : %lu",__FUNCTION__, recognizer.state);
     // ロングタップの開始時のみ処理を実施
     if (recognizer.state != UIGestureRecognizerStateBegan)
         return;
@@ -213,22 +230,22 @@
     
     MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
     annotation.coordinate = touchMapCoordinate;
-    annotation.title = [NSString stringWithFormat:@"No.%d", (_annotations.count + 1)];
+    annotation.title = [NSString stringWithFormat:@"No.%lu", (_annotations.count + 1)];
     [_annotations addObject:annotation];
     [_mapView addAnnotation:annotation];
-    Log(@"annotations count : %d",_annotations.count);
+    Log(@"annotations count : %lu",_annotations.count);
 
     // PinとPinを線でつなげる
-    int count = _annotations.count;
+    NSInteger count = _annotations.count;
     if (count == 0) {
         return;
     }
     else if (count < 2) {
-        _clearButton.enabled = YES;
+        _clearButton.tintColor = [UIColor redColor];
         return;
     }
     else {
-        _clearButton.enabled = YES;
+        _clearButton.tintColor = [UIColor redColor];
     }
     
     CLLocationCoordinate2D coordinates[count];
@@ -293,20 +310,20 @@
     [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
 }
 
-#pragma mark - Public method
+#pragma mark - Public
 
 - (void)deletePinAnnotation:(MKPointAnnotation *)pinAnnotation
 {
     [_mapView removeAnnotation:pinAnnotation];
     [_annotations removeObject:pinAnnotation];
-    Log(@"annotations count : %d",_annotations.count);
+    Log(@"annotations count : %lu",_annotations.count);
     
-    int count = _annotations.count;
+    NSInteger count = _annotations.count;
     if (count == 0) {
         return;
     }
     else if (count < 2) {
-        _clearButton.enabled = NO;
+        _clearButton.tintColor = [UIColor lightGrayColor];
         [_mapView removeOverlay:[_mapView.overlays objectAtIndex:0]];
         return;
     }
@@ -377,7 +394,7 @@
         NSTextCheckingResult *match = [regexp firstMatchInString:text
                                                          options:0
                                                            range:NSMakeRange(0, text.length)];
-        Log(@"%d", match.numberOfRanges);
+        Log(@"%lu", match.numberOfRanges);
         NSInteger number = 0;
         if (match.numberOfRanges > 1) {
             Log(@"%@", [text substringWithRange:[match rangeAtIndex:0]]);   // マッチした文字列全部
@@ -391,7 +408,7 @@
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
     NSInteger number =  [_annotations indexOfObject:view.annotation] + 1;
-    [(MKPointAnnotation *)view.annotation setTitle:[NSString stringWithFormat:@"No.%d", number]];
+    [(MKPointAnnotation *)view.annotation setTitle:[NSString stringWithFormat:@"No.%lu", number]];
 }
 
 - (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id<MKOverlay>)overlay
@@ -405,7 +422,7 @@
 - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view
 didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotationViewDragState)oldState
 {
-    Log(@"new:%d old:%d",newState,oldState);
+    Log(@"new:%lu old:%lu",newState,oldState);
     static BOOL _isDragged = NO;
     
     if (_annotations.count < 2) {
@@ -424,7 +441,7 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
             if (_isDragged) {
                 _isDragged = NO;
                 
-                int count = _annotations.count;
+                NSInteger count = _annotations.count;
                 CLLocationCoordinate2D coordinates[count];
                 for (int loopCount = 0; loopCount < count; loopCount++) {
                     MKPointAnnotation *annotation = [_annotations objectAtIndex:loopCount];
@@ -485,11 +502,14 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
 {
     Log(@"");
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        if (OsVersionMoreThan(@"7.0")) {
+            _statusbarHidden = NO;
+            [self setNeedsStatusBarAppearanceUpdate];
+        }
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             [UIView beginAnimations:@"animateSearchBar" context:NULL];
             
-//            _searchButton.tintColor = [UIColor blackColor];
-            _searchButton.tintColor = _buttonDefaultColor;
             CGRect rect;
             rect = _searchBar.frame;
             rect.origin.y -= _searchBar.frame.size.height;
@@ -512,7 +532,7 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
             _isSearchLoading = NO;
             _hasSerachError = YES;
         } else {
-            Log(@"%d",placemarks.count);
+            Log(@"%lu",placemarks.count);
             _searchPlacemarks = placemarks;
             _isSearchLoading = NO;
             _hasSerachError = NO;
@@ -541,7 +561,6 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
     Log(@"");
     while (_isSearchLoading) {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-//        [NSThread sleepForTimeInterval:0.1];
     }
     
     if (_hasSerachError) {
@@ -561,7 +580,6 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
         Log("%@",string);
     }
     cell.textLabel.text = [self adressForPlacemark:placemark];
-//    cell.textLabel.text = [[placemark.addressDictionary valueForKey:@"FormattedAddressLines"] objectAtIndex:0];
     
     return cell;
 }

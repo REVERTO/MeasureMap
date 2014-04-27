@@ -23,6 +23,10 @@
 
 #define GATrackEvent(CATEGORY,ACTION,LABEL,VALUE) [[[GAI sharedInstance] defaultTracker] send:[[GAIDictionaryBuilder createEventWithCategory:CATEGORY action:ACTION label:LABEL value:VALUE] build]];
 
+#define OsVersionMoreThan(VERSION) ([[[UIDevice currentDevice] systemVersion] compare:VERSION options:NSNumericSearch] == NSOrderedDescending)
+
+#define OsVersionLessThan(VERSION) ([[[UIDevice currentDevice] systemVersion] compare:VERSION options:NSNumericSearch] == NSOrderedAscending)
+
 #define kNOUpdateAnnotations    @"UpdateAnnotations"
 
 #import "UIViewController+MM.h"
