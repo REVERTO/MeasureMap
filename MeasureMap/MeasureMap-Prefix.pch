@@ -11,6 +11,8 @@
 #ifdef __OBJC__
     #import <UIKit/UIKit.h>
     #import <Foundation/Foundation.h>
+    #import "GAI.h"
+    #import "GAIDictionaryBuilder.h"
 #endif
 
 #ifdef DEBUG
@@ -19,7 +21,7 @@
 #define Log(...)
 #endif
 
-#define GATrackEvent(event,action,label,value) [[[GAI sharedInstance] defaultTracker] trackEventWithCategory:event withAction:action withLabel:label withValue:value];
+#define GATrackEvent(CATEGORY,ACTION,LABEL,VALUE) [[[GAI sharedInstance] defaultTracker] send:[[GAIDictionaryBuilder createEventWithCategory:CATEGORY action:ACTION label:LABEL value:VALUE] build]];
 
 #define kNOUpdateAnnotations    @"UpdateAnnotations"
 

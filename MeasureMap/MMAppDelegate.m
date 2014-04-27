@@ -15,12 +15,14 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    // Override point for customization after application launch.
+    // google analytics tracking.
     [GAI sharedInstance].trackUncaughtExceptions = YES;
     [GAI sharedInstance].dispatchInterval = 10;
-    [GAI sharedInstance].debug = NO;
-    [[GAI sharedInstance].defaultTracker setUseHttps:YES];
+#if DEBUG
+    [[GAI sharedInstance].logger setLogLevel:kGAILogLevelVerbose];
+#endif
     [[GAI sharedInstance] trackerWithTrackingId:@"UA-37381910-1"];
+    [[GAI sharedInstance] defaultTracker];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];

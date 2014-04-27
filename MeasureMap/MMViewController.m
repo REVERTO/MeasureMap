@@ -54,7 +54,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    self.trackedViewName = NSStringFromClass([self class]);
+    self.screenName = NSStringFromClass([self class]);
     _annotations = [NSMutableArray array];
     _isFirst = YES;
     
