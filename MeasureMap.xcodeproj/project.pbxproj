@@ -8,6 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		614AE6066B344063BE1ACD77 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BAC4A0FAB6D458B929F74F0 /* libPods.a */; };
+		B00A9080190E7B55001499BF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00A907F190E7B54001499BF /* StoreKit.framework */; };
+		B00A9083190E8019001499BF /* setting.png in Resources */ = {isa = PBXBuildFile; fileRef = B00A9081190E8019001499BF /* setting.png */; };
+		B00A9084190E8019001499BF /* setting@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B00A9082190E8019001499BF /* setting@2x.png */; };
+		B00A9088190E893F001499BF /* MMBaseTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B00A9087190E893E001499BF /* MMBaseTableViewController.m */; };
+		B00A908B190E9466001499BF /* MMSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B00A908A190E9466001499BF /* MMSettingsViewController.m */; };
+		B00A909A1914BF41001499BF /* UIColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = B00A90991914BF41001499BF /* UIColor+Hex.m */; };
+		B00A90A019173870001499BF /* MMSplashViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B00A909E19173870001499BF /* MMSplashViewController.m */; };
+		B00A90A119173870001499BF /* MMSplashViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B00A909F19173870001499BF /* MMSplashViewController.xib */; };
 		B0214C7116EA28AE00431BEC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0214C7016EA28AE00431BEC /* QuartzCore.framework */; };
 		B0329584190BED990076205A /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = B0329583190BED990076205A /* Podfile */; };
 		B0329590190CE8E90076205A /* list.png in Resources */ = {isa = PBXBuildFile; fileRef = B0329588190CE8E90076205A /* list.png */; };
@@ -29,6 +37,7 @@
 		B05F495C165009F5007B6F1C /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = B05F495A165009F5007B6F1C /* AppIcon.png */; };
 		B05F495D165009F5007B6F1C /* AppIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B05F495B165009F5007B6F1C /* AppIcon@2x.png */; };
 		B09EFFE116EAF2C800E7067B /* MMLicenseViewContoller.m in Sources */ = {isa = PBXBuildFile; fileRef = B09EFFE016EAF2C800E7067B /* MMLicenseViewContoller.m */; };
+		B0AA6691191773840005D5D4 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0AA6693191773840005D5D4 /* MainStoryboard_iPad.storyboard */; };
 		B0AE46401642BB8D009B28FC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE463F1642BB8D009B28FC /* UIKit.framework */; };
 		B0AE46421642BB8D009B28FC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE46411642BB8D009B28FC /* Foundation.framework */; };
 		B0AE46441642BB8D009B28FC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE46431642BB8D009B28FC /* CoreGraphics.framework */; };
@@ -42,8 +51,6 @@
 		B0AE465C1642BB8D009B28FC /* MMViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0AE465B1642BB8D009B28FC /* MMViewController.m */; };
 		B0AE46671642BD44009B28FC /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE46661642BD44009B28FC /* MapKit.framework */; };
 		B0AE46691642C116009B28FC /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0AE46681642C116009B28FC /* CoreLocation.framework */; };
-		B0D1308B1669EA6F0079183D /* MMSearchResultViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B0D1308A1669EA6F0079183D /* MMSearchResultViewController.m */; };
-		B0D130FF166A6DBD0079183D /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0D130FE166A6DBD0079183D /* MainStoryboard_iPad.storyboard */; };
 		B0EA13D116F45E760022F52C /* MMCalloutButton.m in Sources */ = {isa = PBXBuildFile; fileRef = B0EA13D016F45E760022F52C /* MMCalloutButton.m */; };
 		B0EA13D316F47BCE0022F52C /* licenses.html in Resources */ = {isa = PBXBuildFile; fileRef = B0EA13D216F47BCE0022F52C /* licenses.html */; };
 		B0EA13D616F4D5F60022F52C /* UIViewController+MM.m in Sources */ = {isa = PBXBuildFile; fileRef = B0EA13D516F4D5F50022F52C /* UIViewController+MM.m */; };
@@ -52,6 +59,19 @@
 /* Begin PBXFileReference section */
 		4AAA6DB99E3C42328E3F7EBA /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 		7BAC4A0FAB6D458B929F74F0 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		B00A907F190E7B54001499BF /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B00A9081190E8019001499BF /* setting.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = setting.png; sourceTree = "<group>"; };
+		B00A9082190E8019001499BF /* setting@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "setting@2x.png"; sourceTree = "<group>"; };
+		B00A9086190E893E001499BF /* MMBaseTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMBaseTableViewController.h; sourceTree = "<group>"; };
+		B00A9087190E893E001499BF /* MMBaseTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMBaseTableViewController.m; sourceTree = "<group>"; };
+		B00A9089190E9466001499BF /* MMSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMSettingsViewController.h; sourceTree = "<group>"; };
+		B00A908A190E9466001499BF /* MMSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMSettingsViewController.m; sourceTree = "<group>"; };
+		B00A90981914BF41001499BF /* UIColor+Hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Hex.h"; sourceTree = "<group>"; };
+		B00A90991914BF41001499BF /* UIColor+Hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Hex.m"; sourceTree = "<group>"; };
+		B00A909B19172CA3001499BF /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ja; path = ja.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
+		B00A909D19173870001499BF /* MMSplashViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMSplashViewController.h; sourceTree = "<group>"; };
+		B00A909E19173870001499BF /* MMSplashViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMSplashViewController.m; sourceTree = "<group>"; };
+		B00A909F19173870001499BF /* MMSplashViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MMSplashViewController.xib; sourceTree = "<group>"; };
 		B0214C7016EA28AE00431BEC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		B023D012165021480069382D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B0329583190BED990076205A /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -78,6 +98,8 @@
 		B05F495B165009F5007B6F1C /* AppIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "AppIcon@2x.png"; sourceTree = "<group>"; };
 		B09EFFDF16EAF2C800E7067B /* MMLicenseViewContoller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMLicenseViewContoller.h; sourceTree = "<group>"; };
 		B09EFFE016EAF2C800E7067B /* MMLicenseViewContoller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMLicenseViewContoller.m; sourceTree = "<group>"; };
+		B0AA6692191773840005D5D4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		B0AA66941917738B0005D5D4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ja; path = ja.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
 		B0AE463B1642BB8D009B28FC /* MeasureMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeasureMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0AE463F1642BB8D009B28FC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B0AE46411642BB8D009B28FC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -96,9 +118,6 @@
 		B0AE465B1642BB8D009B28FC /* MMViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MMViewController.m; sourceTree = "<group>"; };
 		B0AE46661642BD44009B28FC /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		B0AE46681642C116009B28FC /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		B0D130891669EA6F0079183D /* MMSearchResultViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMSearchResultViewController.h; sourceTree = "<group>"; };
-		B0D1308A1669EA6F0079183D /* MMSearchResultViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMSearchResultViewController.m; sourceTree = "<group>"; };
-		B0D130FE166A6DBD0079183D /* MainStoryboard_iPad.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
 		B0EA13CF16F45E750022F52C /* MMCalloutButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MMCalloutButton.h; sourceTree = "<group>"; };
 		B0EA13D016F45E760022F52C /* MMCalloutButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MMCalloutButton.m; sourceTree = "<group>"; };
 		B0EA13D216F47BCE0022F52C /* licenses.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = licenses.html; sourceTree = "<group>"; };
@@ -111,6 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B00A9080190E7B55001499BF /* StoreKit.framework in Frameworks */,
 				B0214C7116EA28AE00431BEC /* QuartzCore.framework in Frameworks */,
 				B03909A8169496ED00A13586 /* SystemConfiguration.framework in Frameworks */,
 				B03909A6169496E300A13586 /* CoreData.framework in Frameworks */,
@@ -143,12 +163,12 @@
 			children = (
 				B041808D16464F37000CD118 /* MMListViewController.h */,
 				B041808E16464F37000CD118 /* MMListViewController.m */,
-				B0D130891669EA6F0079183D /* MMSearchResultViewController.h */,
-				B0D1308A1669EA6F0079183D /* MMSearchResultViewController.m */,
 				B04CD55F16EA1F6100FCF3B6 /* MMLocationInformationViewController.h */,
 				B04CD56016EA1F6100FCF3B6 /* MMLocationInformationViewController.m */,
 				B09EFFDF16EAF2C800E7067B /* MMLicenseViewContoller.h */,
 				B09EFFE016EAF2C800E7067B /* MMLicenseViewContoller.m */,
+				B00A9089190E9466001499BF /* MMSettingsViewController.h */,
+				B00A908A190E9466001499BF /* MMSettingsViewController.m */,
 			);
 			name = AssistView;
 			sourceTree = "<group>";
@@ -158,8 +178,29 @@
 			children = (
 				B0EA13D416F4D5F50022F52C /* UIViewController+MM.h */,
 				B0EA13D516F4D5F50022F52C /* UIViewController+MM.m */,
+				B00A90981914BF41001499BF /* UIColor+Hex.h */,
+				B00A90991914BF41001499BF /* UIColor+Hex.m */,
 			);
 			name = Common;
+			sourceTree = "<group>";
+		};
+		B00A9085190E88D0001499BF /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				B00A9086190E893E001499BF /* MMBaseTableViewController.h */,
+				B00A9087190E893E001499BF /* MMBaseTableViewController.m */,
+			);
+			name = Base;
+			sourceTree = "<group>";
+		};
+		B00A909C1917382E001499BF /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				B00A909D19173870001499BF /* MMSplashViewController.h */,
+				B00A909E19173870001499BF /* MMSplashViewController.m */,
+				B00A909F19173870001499BF /* MMSplashViewController.xib */,
+			);
+			name = Splash;
 			sourceTree = "<group>";
 		};
 		B0329587190CE8E90076205A /* Images */ = {
@@ -173,6 +214,8 @@
 				B032958D190CE8E90076205A /* search@2x.png */,
 				B032958E190CE8E90076205A /* trash.png */,
 				B032958F190CE8E90076205A /* trash@2x.png */,
+				B00A9081190E8019001499BF /* setting.png */,
+				B00A9082190E8019001499BF /* setting@2x.png */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -199,6 +242,7 @@
 		B0AE463E1642BB8D009B28FC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B00A907F190E7B54001499BF /* StoreKit.framework */,
 				B0214C7016EA28AE00431BEC /* QuartzCore.framework */,
 				B03909A7169496ED00A13586 /* SystemConfiguration.framework */,
 				B03909A5169496E300A13586 /* CoreData.framework */,
@@ -219,7 +263,9 @@
 				B0AE464E1642BB8D009B28FC /* MMAppDelegate.h */,
 				B0AE464F1642BB8D009B28FC /* MMAppDelegate.m */,
 				B0AE46571642BB8D009B28FC /* MainStoryboard.storyboard */,
-				B0D130FE166A6DBD0079183D /* MainStoryboard_iPad.storyboard */,
+				B0AA6693191773840005D5D4 /* MainStoryboard_iPad.storyboard */,
+				B00A9085190E88D0001499BF /* Base */,
+				B00A909C1917382E001499BF /* Splash */,
 				B00A907C190CEF8E001499BF /* MainView */,
 				B00A907D190CEFB0001499BF /* AssistView */,
 				B00A907E190CEFD6001499BF /* Common */,
@@ -310,6 +356,7 @@
 				B0AE46521642BB8D009B28FC /* Default.png in Resources */,
 				B0AE46541642BB8D009B28FC /* Default@2x.png in Resources */,
 				B0AE46561642BB8D009B28FC /* Default-568h@2x.png in Resources */,
+				B00A9084190E8019001499BF /* setting@2x.png in Resources */,
 				B0AE46591642BB8D009B28FC /* MainStoryboard.storyboard in Resources */,
 				B05F4956164FC6C2007B6F1C /* Localizable.strings in Resources */,
 				B0329597190CE8E90076205A /* trash@2x.png in Resources */,
@@ -318,8 +365,10 @@
 				B0329595190CE8E90076205A /* search@2x.png in Resources */,
 				B0329590190CE8E90076205A /* list.png in Resources */,
 				B0329593190CE8E90076205A /* location@2x.png in Resources */,
+				B00A90A119173870001499BF /* MMSplashViewController.xib in Resources */,
 				B05F495D165009F5007B6F1C /* AppIcon@2x.png in Resources */,
-				B0D130FF166A6DBD0079183D /* MainStoryboard_iPad.storyboard in Resources */,
+				B0AA6691191773840005D5D4 /* MainStoryboard_iPad.storyboard in Resources */,
+				B00A9083190E8019001499BF /* setting.png in Resources */,
 				B0329584190BED990076205A /* Podfile in Resources */,
 				B03909B31694A63C00A13586 /* AppIcon_ipad@2x.png in Resources */,
 				B03909B41694A63C00A13586 /* AppIcon_ipad.png in Resources */,
@@ -369,13 +418,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0AE464C1642BB8D009B28FC /* main.m in Sources */,
+				B00A909A1914BF41001499BF /* UIColor+Hex.m in Sources */,
 				B0AE46501642BB8D009B28FC /* MMAppDelegate.m in Sources */,
 				B0AE465C1642BB8D009B28FC /* MMViewController.m in Sources */,
 				B041808F16464F37000CD118 /* MMListViewController.m in Sources */,
-				B0D1308B1669EA6F0079183D /* MMSearchResultViewController.m in Sources */,
+				B00A90A019173870001499BF /* MMSplashViewController.m in Sources */,
 				B04CD56116EA1F6100FCF3B6 /* MMLocationInformationViewController.m in Sources */,
 				B09EFFE116EAF2C800E7067B /* MMLicenseViewContoller.m in Sources */,
 				B0EA13D116F45E760022F52C /* MMCalloutButton.m in Sources */,
+				B00A9088190E893F001499BF /* MMBaseTableViewController.m in Sources */,
+				B00A908B190E9466001499BF /* MMSettingsViewController.m in Sources */,
 				B0EA13D616F4D5F60022F52C /* UIViewController+MM.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -392,6 +444,15 @@
 			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
+		B0AA6693191773840005D5D4 /* MainStoryboard_iPad.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B0AA6692191773840005D5D4 /* en */,
+				B0AA66941917738B0005D5D4 /* ja */,
+			);
+			name = MainStoryboard_iPad.storyboard;
+			sourceTree = "<group>";
+		};
 		B0AE46481642BB8D009B28FC /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -405,6 +466,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				B0AE46581642BB8D009B28FC /* en */,
+				B00A909B19172CA3001499BF /* ja */,
 			);
 			name = MainStoryboard.storyboard;
 			sourceTree = "<group>";
@@ -470,10 +532,7 @@
 				GCC_PREFIX_HEADER = "MeasureMap/MeasureMap-Prefix.pch";
 				INFOPLIST_FILE = "MeasureMap/MeasureMap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/MeasureMap/GoogleAnalyticsiOS_2.0beta3\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				WRAPPER_EXTENSION = app;
@@ -489,10 +548,7 @@
 				GCC_PREFIX_HEADER = "MeasureMap/MeasureMap-Prefix.pch";
 				INFOPLIST_FILE = "MeasureMap/MeasureMap-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/MeasureMap/GoogleAnalyticsiOS_2.0beta3\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "51E25853-0F88-4CCA-8F6C-DA8BB3E250F1";
 				TARGETED_DEVICE_FAMILY = "1,2";

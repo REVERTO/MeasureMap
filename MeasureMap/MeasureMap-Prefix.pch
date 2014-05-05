@@ -13,6 +13,9 @@
     #import <Foundation/Foundation.h>
     #import "GAI.h"
     #import "GAIDictionaryBuilder.h"
+    #import "BlocksKit+UIKit.h"
+    #import "UIViewController+MM.h"
+    #import "UIColor+Hex.h"
 #endif
 
 #ifdef DEBUG
@@ -27,6 +30,18 @@
 
 #define OsVersionLessThan(VERSION) ([[[UIDevice currentDevice] systemVersion] compare:VERSION options:NSNumericSearch] == NSOrderedAscending)
 
-#define kNOUpdateAnnotations    @"UpdateAnnotations"
+#define RGBA(RED,GREEN,BLUE,ALPHA)  [UIColor colorWithRed:(RED/255.0) green:(GREEN/255.0) blue:(BLUE/255.0) alpha:ALPHA]
 
-#import "UIViewController+MM.h"
+#define kNOUpdateAnnotations        @"UpdateAnnotations"
+
+#define kUDSegmentIndex             @"SegmentIndex"
+#define kUDTransportType            @"TransportType"
+#define kUDDistanceUnits            @"DistanceUnits"
+#define kUDInitialized              @"Initialized"
+#define kUDRemoveAd                 @"RemoveAd"
+
+
+typedef NS_ENUM(NSInteger, MMDistanceUnits) {
+    MMDistanceUnitsMeters,
+    MMDistanceUnitsMiles
+};

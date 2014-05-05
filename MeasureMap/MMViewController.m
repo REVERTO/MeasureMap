@@ -11,6 +11,8 @@
 #import "MMLocationInformationViewController.h"
 #import "MMAppDelegate.h"
 #import "MMCalloutButton.h"
+#import <QuartzCore/QuartzCore.h>
+#import "MMSettingsViewController.h"
 
 static BOOL _statusbarHidden;
 
@@ -37,17 +39,22 @@ static BOOL _statusbarHidden;
     BOOL _hasSerachError;
     NSArray *_toolBarItems;
     MKPointAnnotation *_disclosedAnnotation;
+    NSMutableArray *_caluculatedRoutes;
+    NSArray *_caluculatedDistances;
 }
 
 // UI
-@property (weak, nonatomic) IBOutlet MKMapView *mapView;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolBar;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *listButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *clearButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *searchButton;
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *currentButton;
 @property (weak, nonatomic) IBOutlet ADBannerView *bannerView;
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (weak, nonatomic) IBOutlet UIView *segmentParts;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
+@property (weak, nonatomic) IBOutlet UIView *settingParts;
+@property (weak, nonatomic) IBOutlet UIButton *settingButton;
+@property (weak, nonatomic) IBOutlet UILabel *totalDistanceLabel;
 
 // controller
 @property (strong, nonatomic) CLLocationManager *locationManager;
@@ -56,11 +63,36 @@ static BOOL _statusbarHidden;
 @property (strong, nonatomic) UIPopoverController *locationPopover;
 @property (strong, nonatomic) MMListViewController *listViewController;
 
+@property UIView *overlay;
+@property UIActivityIndicatorView *indicator;
+
 @end
 
 @implementation MMViewController
 
 @synthesize toolBar = _toolBar;
+
+- (void)showLoadingIndicator
+{
+    self.overlay = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]];
+    self.overlay.backgroundColor = RGBA(0, 0, 0, 0.5);
+    self.indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    self.indicator.center = CGPointMake(self.overlay.frame.size.width/2, self.overlay.frame.size.height/2);
+    [self.overlay addSubview:self.indicator];
+    [self.indicator startAnimating];
+    
+    UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
+    [window addSubview:self.overlay];
+}
+
+- (void)hideLoadingIndicator
+{
+    [self.indicator stopAnimating];
+    [self.indicator removeFromSuperview];
+    self.indicator = nil;
+    [self.overlay removeFromSuperview];
+    self.overlay = nil;
+}
 
 #pragma mark - UIViewController Lifecycle
 
@@ -71,14 +103,45 @@ static BOOL _statusbarHidden;
     self.screenName = NSStringFromClass([self class]);
     _annotations = [NSMutableArray array];
     _isFirst = YES;
+
+    // top parts
+    if (!OsVersionLessThan(@"7.0")) {
+        _segmentParts.backgroundColor = [UIColor colorWithHex:@"eeeeee" alpha:0.8];
+        _segmentParts.layer.borderColor = [UIColor colorWithHex:@"cccccc" alpha:1.0].CGColor;
+        _segmentParts.layer.borderWidth = 1.0;
+        _segmentParts.layer.cornerRadius = 4.0;
+        _settingParts.backgroundColor = [UIColor colorWithHex:@"eeeeee" alpha:0.8];
+        _settingParts.layer.borderColor = [UIColor colorWithHex:@"cccccc" alpha:1.0].CGColor;
+        _settingParts.layer.borderWidth = 1.0;
+        _settingParts.layer.cornerRadius = 4.0;
+        _totalDistanceLabel.alpha = 0.0;
+        CGRect frame = _segmentParts.frame;
+        frame.size.height = 39;
+        _segmentParts.frame = frame;
+        _segmentedControl.selectedSegmentIndex = [[NSUserDefaults standardUserDefaults] integerForKey:kUDSegmentIndex];
+    }
+    else {
+        _segmentParts.hidden = YES;
+        _settingParts.hidden = YES;
+    }
     
+    // tool bar
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        self.navigationItem.titleView = _toolBar;
+        _toolBar.backgroundColor = [UIColor clearColor];
+        for (id view in _toolBar.subviews) {
+            if (![view isKindOfClass:[UIBarButtonItem class]] && ![view isKindOfClass:[UISearchBar class]] && ![view isKindOfClass:[UISegmentedControl class]]) {
+                [(UIView *)view setHidden:YES];
+            }
+        }
+    }
     _clearButton.tintColor = [UIColor lightGrayColor];
     _currentButton.tintColor = [UIColor lightGrayColor];
     _searchBar.placeholder = NSLocalizedString(@"message.search", nil);
     _searchBar.tintColor = [UIColor whiteColor];
     
-    if ([self.parentViewController isKindOfClass:[UISplitViewController class]]) {
-        self.splitViewController = (UISplitViewController *)self.parentViewController;
+    if ([self.navigationController.parentViewController isKindOfClass:[UISplitViewController class]]) {
+        self.splitViewController = (UISplitViewController *)self.parentViewController.parentViewController;
         self.splitViewController.delegate = self;
         
         _toolBarItems = self.toolBar.items;
@@ -92,10 +155,20 @@ static BOOL _statusbarHidden;
         [self.toolBar setItems:items animated:NO];
     }
 
+    // notification
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewDidRotate:)
                                                  name:UIDeviceOrientationDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deletePinNotified:)
                                                  name:@"deletePin" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeAdNotified:)
+                                                 name:@"removeAd" object:nil];
+
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUDRemoveAd]) {
+        [self removeAdBanner];
+    }
+    else {
+        [self hideAdBannerWithAnimated:NO];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -151,8 +224,12 @@ static BOOL _statusbarHidden;
     if ([[segue identifier] isEqualToString:@"MapToList"]) {
         GATrackEvent(@"ButtonTap",@"ListTap",@"AnnotationCount",[NSNumber numberWithInteger:_annotations.count]);
         MMListViewController *listViewController = [segue destinationViewController];
-        listViewController.annotations = _annotations;
+        listViewController.distances = _caluculatedDistances;
     }
+}
+
+- (IBAction)returnForSegue:(UIStoryboardSegue *)segue
+{
 }
 
 - (IBAction)listDidPush:(UIBarButtonItem *)barButtonItem
@@ -181,9 +258,11 @@ static BOOL _statusbarHidden;
 {
     GATrackEvent(@"ButtonTap",@"SearchTap",nil,nil);
     
-    if (OsVersionMoreThan(@"7.0")) {
+    if (!OsVersionLessThan(@"7.0")) {
         _statusbarHidden = YES;
         [self setNeedsStatusBarAppearanceUpdate];
+        self.segmentParts.hidden = YES;
+        self.settingParts.hidden = YES;
     }
     
     [UIView animateWithDuration:0.3 animations:^{
@@ -203,13 +282,9 @@ static BOOL _statusbarHidden;
     if (_annotations.count > 0) {
         [_mapView removeAnnotations:_annotations];
         _annotations = [NSMutableArray array];
-        [_mapView removeOverlays:_mapView.overlays];
         _clearButton.tintColor = [UIColor lightGrayColor];
-        
-        // 更新通知を送信
-        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations", nil];
-        [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+
+        [self reloadOverlaysWithAnnotations:_annotations];
     }
     else {
         [[iToast makeText:NSLocalizedString(@"message.guidetrash", nil)] show];
@@ -218,7 +293,6 @@ static BOOL _statusbarHidden;
 
 - (IBAction)didLongPressByRecognaizer:(UILongPressGestureRecognizer *)recognizer
 {
-    NSLog(@"%s : %lu",__FUNCTION__, recognizer.state);
     // ロングタップの開始時のみ処理を実施
     if (recognizer.state != UIGestureRecognizerStateBegan)
         return;
@@ -230,10 +304,9 @@ static BOOL _statusbarHidden;
     
     MKPointAnnotation *annotation = [[MKPointAnnotation alloc] init];
     annotation.coordinate = touchMapCoordinate;
-    annotation.title = [NSString stringWithFormat:@"No.%lu", (_annotations.count + 1)];
+    annotation.title = [NSString stringWithFormat:@"No.%lu", (long)(_annotations.count + 1)];
     [_annotations addObject:annotation];
     [_mapView addAnnotation:annotation];
-    Log(@"annotations count : %lu",_annotations.count);
 
     // PinとPinを線でつなげる
     NSInteger count = _annotations.count;
@@ -248,23 +321,7 @@ static BOOL _statusbarHidden;
         _clearButton.tintColor = [UIColor redColor];
     }
     
-    CLLocationCoordinate2D coordinates[count];
-    for (int loopCount = 0; loopCount < count; loopCount++) {
-        MKPointAnnotation *annotation = [_annotations objectAtIndex:loopCount];
-        coordinates[loopCount] = CLLocationCoordinate2DMake(annotation.coordinate.latitude, annotation.coordinate.longitude);
-    }
-    MKPolyline *newLine = [MKPolyline polylineWithCoordinates:coordinates count:count];
-    MKPolyline *oldLine;
-    if (_mapView.overlays.count > 0) {
-        oldLine = [_mapView.overlays objectAtIndex:0];
-    }
-    [_mapView addOverlay:newLine];
-    [_mapView removeOverlay:oldLine];
-
-    // 更新通知を送信
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations",nil];
-    [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+    [self reloadOverlaysWithAnnotations:_annotations];
 }
 
 - (void)calloutButtonDidTap:(UIButton *)button
@@ -303,11 +360,18 @@ static BOOL _statusbarHidden;
     }
     
     [self deletePinAnnotation:_disclosedAnnotation];
+}
 
-    // 更新通知を送信
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations",nil];
-    [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+- (void)removeAdNotified:(id)sender
+{
+    [self removeAdBanner];
+}
+
+- (IBAction)segmentedControlValueChanged:(UISegmentedControl *)segmentedControl
+{
+    [[NSUserDefaults standardUserDefaults] setInteger:segmentedControl.selectedSegmentIndex forKey:kUDSegmentIndex];
+    
+    [self reloadOverlaysWithAnnotations:_annotations];
 }
 
 #pragma mark - Public
@@ -316,30 +380,166 @@ static BOOL _statusbarHidden;
 {
     [_mapView removeAnnotation:pinAnnotation];
     [_annotations removeObject:pinAnnotation];
-    Log(@"annotations count : %lu",_annotations.count);
     
     NSInteger count = _annotations.count;
-    if (count == 0) {
-        return;
-    }
-    else if (count < 2) {
+    if (count < 2) {
         _clearButton.tintColor = [UIColor lightGrayColor];
-        [_mapView removeOverlay:[_mapView.overlays objectAtIndex:0]];
+    }
+    
+    [self reloadOverlaysWithAnnotations:_annotations];
+}
+
+#pragma mark Private
+
+- (void)reloadOverlaysWithAnnotations:(NSArray *)annotations
+{
+    [_mapView removeOverlays:_mapView.overlays];
+    
+    if (annotations.count < 2) {
+        [self hideTotalDistance];
+        // 更新通知を送信
+        [[NSNotificationCenter defaultCenter] postNotificationName:kNOUpdateAnnotations object:nil userInfo:@{@"distances":@[]}];
+        _caluculatedDistances = @[];
         return;
     }
     
-    CLLocationCoordinate2D coordinates[count];
-    for (int loopCount = 0; loopCount < count; loopCount++) {
-        MKPointAnnotation *annotation = [_annotations objectAtIndex:loopCount];
-        coordinates[loopCount] = CLLocationCoordinate2DMake(annotation.coordinate.latitude, annotation.coordinate.longitude);
+    if (_segmentedControl.selectedSegmentIndex == 0) {
+        NSInteger count = annotations.count;
+        CLLocationCoordinate2D coordinates[count];
+        for (int loopCount = 0; loopCount < count; loopCount++) {
+            MKPointAnnotation *annotation = annotations[loopCount];
+            coordinates[loopCount] = CLLocationCoordinate2DMake(annotation.coordinate.latitude, annotation.coordinate.longitude);
+        }
+        MKPolyline *newLine = [MKPolyline polylineWithCoordinates:coordinates count:count];
+        [_mapView addOverlay:newLine];
+        
+        // calc distance
+        NSMutableArray *distances = [NSMutableArray array];
+        NSInteger cellNumber = _annotations.count - 1;
+        for (int loopCount = 0; loopCount < cellNumber; loopCount++) {
+            MKPointAnnotation *fromAnnotation = [_annotations objectAtIndex:loopCount];
+            CLLocation *fromLocation = [[CLLocation alloc] initWithLatitude:fromAnnotation.coordinate.latitude
+                                                                  longitude:fromAnnotation.coordinate.longitude];
+            MKPointAnnotation *toAnnotation = [_annotations objectAtIndex:(loopCount + 1)];
+            CLLocation *toLocation = [[CLLocation alloc] initWithLatitude:toAnnotation.coordinate.latitude
+                                                                longitude:toAnnotation.coordinate.longitude];
+            CLLocationDistance distance = [toLocation distanceFromLocation:fromLocation];
+            [distances addObject:[NSNumber numberWithDouble:distance]];
+        }
+        
+        // 更新通知を送信
+        [[NSNotificationCenter defaultCenter] postNotificationName:kNOUpdateAnnotations object:nil userInfo:@{@"distances":distances}];
+        _caluculatedDistances = distances;
+        [self showTotalDistance];
     }
-    MKPolyline *newLine = [MKPolyline polylineWithCoordinates:coordinates count:count];
-    MKPolyline *oldLine;
-    if (_mapView.overlays.count > 0) {
-        oldLine = [_mapView.overlays objectAtIndex:0];
+    else {
+        NSMutableArray *mapItems = [NSMutableArray array];
+        for (MKPointAnnotation *annotation in annotations) {
+            MKMapItem *item = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:annotation.coordinate addressDictionary:nil]];
+            [mapItems addObject:item];
+        }
+        [self showLoadingIndicator];
+        _caluculatedRoutes = [NSMutableArray array];
+        [self calculateDirectionsWithMapItems:mapItems rootNo:0 success:^(NSArray *routes) {
+            [self hideLoadingIndicator];
+            
+            NSMutableArray *distances = [NSMutableArray array];
+            for (MKRoute *route in routes) {
+                [_mapView addOverlay:route.polyline];
+                [distances addObject:[NSNumber numberWithDouble:route.distance]];
+            }
+            
+            // 更新通知を送信
+            [[NSNotificationCenter defaultCenter] postNotificationName:kNOUpdateAnnotations object:nil userInfo:@{@"distances":distances}];
+            _caluculatedDistances = distances;
+            [self showTotalDistance];
+        } failure:^{
+            [self hideLoadingIndicator];
+            [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"aleart.failRooting.title", nil)
+                                           message:NSLocalizedString(@"aleart.failRooting.message", nil)
+                                 cancelButtonTitle:NSLocalizedString(@"button.close", nil)
+                                 otherButtonTitles:nil
+                                           handler:nil];
+        }];
     }
-    [_mapView addOverlay:newLine];
-    [_mapView removeOverlay:oldLine];
+}
+
+- (void)calculateDirectionsWithMapItems:(NSArray *)mapItems rootNo:(NSInteger)rootNo success:(void(^)(NSArray *routes))success failure:(void(^)(void))failure
+{
+    if (mapItems.count < rootNo + 2) {
+        if (failure) failure();
+        return;
+    };
+    
+    MKDirectionsRequest *request = [[MKDirectionsRequest alloc] init];
+    request.source = mapItems[rootNo];
+    request.destination = mapItems[rootNo + 1];
+    request.requestsAlternateRoutes = YES;
+    request.transportType = [[NSUserDefaults standardUserDefaults] integerForKey:kUDTransportType];
+    [[[MKDirections alloc] initWithRequest:request] calculateDirectionsWithCompletionHandler:^(MKDirectionsResponse *response, NSError *error) {
+        if (error) {
+            if (failure) failure();
+            return;
+        };
+        if (response.routes.count > 0) {
+            [_caluculatedRoutes addObject:response.routes[0]];
+        }
+        
+        if (mapItems.count == rootNo + 2) {
+            if (success) success(_caluculatedRoutes);
+        }
+        else {
+            [self calculateDirectionsWithMapItems:mapItems rootNo:(rootNo + 1) success:success failure:failure];
+        }
+    }];
+}
+
+- (void)showTotalDistance
+{
+    double totalDistance = 0.0;
+    for (NSNumber *distance in _caluculatedDistances) {
+        totalDistance += distance.doubleValue;
+    }
+
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:kUDDistanceUnits] == MMDistanceUnitsMeters) {
+        if (totalDistance < 1000) {
+            _totalDistanceLabel.text = [NSString stringWithFormat:@"%@ %.0lfm", NSLocalizedString(@"word.total", nil), totalDistance];
+        }
+        else {
+            _totalDistanceLabel.text = [NSString stringWithFormat:@"%@ %.1lfkm", NSLocalizedString(@"word.total", nil), (totalDistance / 1000)];
+        }
+    }
+    else {
+        _totalDistanceLabel.text = [NSString stringWithFormat:@"%@ %.2lfmi", NSLocalizedString(@"word.total", nil), (totalDistance / 1640)];
+    }
+
+    if (_segmentParts.frame.size.height != 65) {
+        _totalDistanceLabel.alpha = 0.0;
+        [UIView animateWithDuration:0.4 animations:^{
+            CGRect frame = _segmentParts.frame;
+            frame.size.height = 65;
+            _segmentParts.frame = frame;
+        } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.2 animations:^{
+                _totalDistanceLabel.alpha = 1.0;
+            }];
+        }];
+    }
+}
+
+- (void)hideTotalDistance
+{
+    if (_segmentParts.frame.size.height == 40) return;
+    
+    [UIView animateWithDuration:0.2 animations:^{
+        _totalDistanceLabel.alpha = 0.0;
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.4 animations:^{
+            CGRect frame = _segmentParts.frame;
+            frame.size.height = 39;
+            _segmentParts.frame = frame;
+        }];
+    }];
 }
 
 #pragma mark - MKMapViewDelegate
@@ -394,7 +594,6 @@ static BOOL _statusbarHidden;
         NSTextCheckingResult *match = [regexp firstMatchInString:text
                                                          options:0
                                                            range:NSMakeRange(0, text.length)];
-        Log(@"%lu", match.numberOfRanges);
         NSInteger number = 0;
         if (match.numberOfRanges > 1) {
             Log(@"%@", [text substringWithRange:[match rangeAtIndex:0]]);   // マッチした文字列全部
@@ -407,8 +606,10 @@ static BOOL _statusbarHidden;
 
 - (void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
 {
+    if (![view.annotation isKindOfClass:([MKPointAnnotation class])]) return;
+    
     NSInteger number =  [_annotations indexOfObject:view.annotation] + 1;
-    [(MKPointAnnotation *)view.annotation setTitle:[NSString stringWithFormat:@"No.%lu", number]];
+    [(MKPointAnnotation *)view.annotation setTitle:[NSString stringWithFormat:@"No.%ld", (long)number]];
 }
 
 - (MKOverlayView *)mapView:(MKMapView *)mapView viewForOverlay:(id<MKOverlay>)overlay
@@ -422,7 +623,6 @@ static BOOL _statusbarHidden;
 - (void)mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view
 didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotationViewDragState)oldState
 {
-    Log(@"new:%lu old:%lu",newState,oldState);
     static BOOL _isDragged = NO;
     
     if (_annotations.count < 2) {
@@ -441,24 +641,7 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
             if (_isDragged) {
                 _isDragged = NO;
                 
-                NSInteger count = _annotations.count;
-                CLLocationCoordinate2D coordinates[count];
-                for (int loopCount = 0; loopCount < count; loopCount++) {
-                    MKPointAnnotation *annotation = [_annotations objectAtIndex:loopCount];
-                    coordinates[loopCount] = CLLocationCoordinate2DMake(annotation.coordinate.latitude, annotation.coordinate.longitude);
-                }
-                MKPolyline *newLine = [MKPolyline polylineWithCoordinates:coordinates count:count];
-                MKPolyline *oldLine;
-                if (_mapView.overlays.count > 0) {
-                    oldLine = [_mapView.overlays objectAtIndex:0];
-                }
-                [_mapView addOverlay:newLine];
-                [_mapView removeOverlay:oldLine];
-                
-                // 更新通知を送信
-                NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:_annotations,@"annotations",nil];
-                [center postNotificationName:kNOUpdateAnnotations object:nil userInfo:userInfo];
+                [self reloadOverlaysWithAnnotations:_annotations];
             }
             break;
             
@@ -502,9 +685,11 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
 {
     Log(@"");
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        if (OsVersionMoreThan(@"7.0")) {
+        if (!OsVersionLessThan(@"7.0")) {
             _statusbarHidden = NO;
             [self setNeedsStatusBarAppearanceUpdate];
+            self.segmentParts.hidden = NO;
+            self.settingParts.hidden = NO;
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -532,7 +717,6 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
             _isSearchLoading = NO;
             _hasSerachError = YES;
         } else {
-            Log(@"%lu",placemarks.count);
             _searchPlacemarks = placemarks;
             _isSearchLoading = NO;
             _hasSerachError = NO;
@@ -648,52 +832,88 @@ didChangeDragState:(MKAnnotationViewDragState)newState fromOldState:(MKAnnotatio
 
 - (void)bannerViewDidLoadAd:(ADBannerView *)banner
 {
-    if (!_bannerIsVisible)
-    {
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-            // iPhoneの場合
-            [UIView beginAnimations:@"animateAdBannerOn" context:NULL];
-            CGRect rect = _mapView.frame;
-            rect.size.height -= _bannerView.frame.size.height;
-            _mapView.frame = rect;
-            _toolBar.frame = CGRectOffset(_toolBar.frame, 0, -(_bannerView.frame.size.height));
-            _bannerView.frame = CGRectOffset(_bannerView.frame, 0, -(_bannerView.frame.size.height));
-            [UIView commitAnimations];
-            _bannerIsVisible = YES;
-        }
-        else {
-            // iPadの場合
-            [UIView beginAnimations:@"animateAdBannerOn" context:NULL];
-            _bannerView.frame = CGRectOffset(_bannerView.frame, 0, -(_bannerView.frame.size.height));
-            [UIView commitAnimations];
-            _bannerIsVisible = YES;
-        }
-    }
+    [self showAdBannerWithAnimated:YES];
 }
 
 - (void)bannerView:(ADBannerView *)banner didFailToReceiveAdWithError:(NSError *)error
 {
-    if (_bannerIsVisible)
-    {
+    [self hideAdBannerWithAnimated:YES];
+}
+
+- (void)showAdBannerWithAnimated:(BOOL)animated
+{
+    CGFloat duration = animated ? 0.3 : 0.0;
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        // iPhoneの場合
+        [UIView animateWithDuration:duration animations:^{
+            // map view
+            CGRect rect;
+            rect = _mapView.frame;
+            rect.size.height = self.view.frame.size.height - _bannerView.frame.size.height;
+            _mapView.frame = rect;
+            //tool bar
+            rect = _toolBar.frame;
+            rect.origin.y = _mapView.frame.size.height - _toolBar.frame.size.height;
+            _toolBar.frame = rect;
+            //banner view
+            rect = _bannerView.frame;
+            rect.origin.y = _mapView.frame.size.height;
+            _bannerView.frame = rect;
+        }];
+    }
+    else {
+        // iPadの場合
+        [UIView animateWithDuration:duration animations:^{
+            //banner view
+            CGRect rect;
+            rect = _bannerView.frame;
+            rect.origin.y = _mapView.frame.size.height - _bannerView.frame.size.height;
+            _bannerView.frame = rect;
+        }];
+    }
+}
+
+- (void)hideAdBannerWithAnimated:(BOOL)animated
+{
+    CGFloat duration = animated ? 0.3 : 0.0;
+    
         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
             // iPhoneの場合
-            [UIView beginAnimations:@"animateAdBannerOff" context:NULL];
-            CGRect rect = _mapView.frame;
-            rect.size.height  += _bannerView.frame.size.height;
-            _mapView.frame = rect;
-            _toolBar.frame = CGRectOffset(_toolBar.frame, 0, _bannerView.frame.size.height);
-            _bannerView.frame = CGRectOffset(_bannerView.frame, 0, _bannerView.frame.size.height);
-            [UIView commitAnimations];
-            _bannerIsVisible = NO;
+            [UIView animateWithDuration:duration animations:^{
+                // map view
+                CGRect rect;
+                rect = _mapView.frame;
+                rect.size.height = self.view.frame.size.height;
+                _mapView.frame = rect;
+                //tool bar
+                rect = _toolBar.frame;
+                rect.origin.y = _mapView.frame.size.height - _toolBar.frame.size.height;
+                _toolBar.frame = rect;
+                //banner view
+                rect = _bannerView.frame;
+                rect.origin.y = _mapView.frame.size.height;
+                _bannerView.frame = rect;
+            }];
         }
         else {
             // iPadの場合
-            [UIView beginAnimations:@"animateAdBannerOff" context:NULL];
-            _bannerView.frame = CGRectOffset(_bannerView.frame, 0, _bannerView.frame.size.height);
-            [UIView commitAnimations];
-            _bannerIsVisible = NO;
+            [UIView animateWithDuration:duration animations:^{
+                //banner view
+                CGRect rect;
+                rect = _bannerView.frame;
+                rect.origin.y = _mapView.frame.size.height;
+                _bannerView.frame = rect;
+            }];
         }
-    }
+}
+
+- (void)removeAdBanner
+{
+    [self hideAdBannerWithAnimated:NO];
+    _bannerView.delegate = nil;
+    [_bannerView removeFromSuperview];
+    _bannerView = nil;
 }
 
 #pragma mark - Accessor

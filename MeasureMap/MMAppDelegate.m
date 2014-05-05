@@ -8,7 +8,6 @@
 
 #import "MMAppDelegate.h"
 #import "GAI.h"
-#import "MMViewController.h"
 #import "MMLocationInformationViewController.h"
 #import <iToast.h>
 
@@ -29,6 +28,14 @@
     iToastSettings *ts = [iToastSettings getSharedSettings];
     ts.gravity = iToastGravityCenter;
     ts.duration = 2000;
+
+    // initialized check
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:kUDInitialized]) {
+        [[NSUserDefaults standardUserDefaults] setInteger:MMDistanceUnitsMeters forKey:kUDDistanceUnits];
+        [[NSUserDefaults standardUserDefaults] setInteger:MKDirectionsTransportTypeWalking forKey:kUDTransportType];
+        
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:kUDInitialized];
+    }
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -37,13 +44,24 @@
         self.sidePanelController.shouldDelegateAutorotateToVisiblePanel = YES;
         
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"MainStoryboard" bundle:[NSBundle mainBundle]];
-        MMViewController *mainVC = [storyboard instantiateViewControllerWithIdentifier:@"MMViewController"];
+        self.mmVC = [storyboard instantiateViewControllerWithIdentifier:@"MMViewController"];
         self.locationInformationVC = [storyboard instantiateViewControllerWithIdentifier:@"MMLocationInformationViewController"];
         
-        self.sidePanelController.centerPanel = mainVC;
+        self.sidePanelController.centerPanel = self.mmVC;
         self.sidePanelController.rightPanel = self.locationInformationVC;
         
-        self.window.rootViewController = self.sidePanelController;
+        self.splashVC = [MMSplashViewController new];
+        self.window.rootViewController = self.splashVC;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            [UIView transitionFromView:self.splashVC.view
+                                toView:self.sidePanelController.view
+                              duration:1.0
+                               options:UIViewAnimationOptionTransitionCrossDissolve
+                            completion:^(BOOL finished) {
+                                self.window.rootViewController = self.sidePanelController;
+                            }];
+        });
+        
         [self.window makeKeyAndVisible];
     }
     else {
@@ -61,8 +79,8 @@
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    self.mmVC.mapView.showsUserLocation = NO;
+    self.mmVC.currentButton.tintColor = [UIColor lightGrayColor];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application

@@ -10,11 +10,15 @@
 #import <MapKit/MapKit.h>
 #import "JASidePanelController.h"
 #import "MMLocationInformationViewController.h"
+#import "MMViewController.h"
+#import "MMSplashViewController.h"
 
 @interface MMAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) JASidePanelController *sidePanelController;
 @property (strong, nonatomic) MMLocationInformationViewController *locationInformationVC;
+@property (strong, nonatomic) MMViewController *mmVC;
+@property (strong, nonatomic) MMSplashViewController*splashVC;
 
 @end

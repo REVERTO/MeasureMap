@@ -46,52 +46,67 @@
     // Change button label.
     _closeButton.title = NSLocalizedString(@"button.close", nil);
     
-    [self calcDistance];
+    [self reloadWithDistances:_distances];
     
-    self.tableView.sectionHeaderHeight = 20;
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        self.tableView.sectionHeaderHeight = 20;
+    }
+    else {
+        self.tableView.sectionHeaderHeight = 1;
+    }
 }
 
 - (void)updateAnnotations:(NSNotification *)notification
 {
-    _annotations = [[notification userInfo] valueForKey:@"annotations"];
-    [self calcDistance];
+    NSArray *distances = [[notification userInfo] valueForKey:@"distances"];
+    [self reloadWithDistances:distances];
     [_tableView reloadData];
 }
 
-- (void)calcDistance
+- (void)reloadWithDistances:(NSArray *)distances
 {
     _cellTexts = [NSMutableArray array];
     _totalDistance = 0.0;
     _navigationBar.topItem.title = @"";
     
-    NSInteger cellNumber = _annotations.count - 1;
-    if (cellNumber > 0) {
-        for (int loopCount = 0; loopCount < cellNumber; loopCount++) {
-            NSInteger fromPinNumber = loopCount + 1;
-            MKPointAnnotation *fromAnnotation = [_annotations objectAtIndex:loopCount];
-            CLLocation *fromLocation = [[CLLocation alloc] initWithLatitude:fromAnnotation.coordinate.latitude
-                                                                  longitude:fromAnnotation.coordinate.longitude];
-            MKPointAnnotation *toAnnotation = [_annotations objectAtIndex:(loopCount + 1)];
-            CLLocation *toLocation = [[CLLocation alloc] initWithLatitude:toAnnotation.coordinate.latitude
-                                                                longitude:toAnnotation.coordinate.longitude];
-            CLLocationDistance distance = [toLocation distanceFromLocation:fromLocation];
-            NSMutableString *cellText = [NSMutableString stringWithFormat:@"No.%ld %@ No.%ld", fromPinNumber, NSLocalizedString(@"word.to", nil), (fromPinNumber + 1)];
-            [_cellTexts addObject:cellText];
-            
+    NSInteger fromPinNumber = 1;
+    for (NSNumber *distanceValue in distances) {
+        CLLocationDistance distance = distanceValue.doubleValue;
+        NSMutableString *cellText = [NSMutableString stringWithFormat:@"No.%d %@ No.%d", fromPinNumber, NSLocalizedString(@"word.to", nil), (fromPinNumber + 1)];
+        [_cellTexts addObject:cellText];
+        
+        if ([[NSUserDefaults standardUserDefaults] integerForKey:kUDDistanceUnits] == MMDistanceUnitsMeters) {
             if (distance < 1000) {
                 [cellText appendFormat:@" : %.0lfm", distance];
             }
             else {
                 [cellText appendFormat:@" : %.1lfkm", (distance / 1000)];
             }
-            _totalDistance += distance;
-        }
-        if (_totalDistance < 1000) {
-            _navigationBar.topItem.title = [NSString stringWithFormat:@"%@ %.0lfm", NSLocalizedString(@"word.total", nil), _totalDistance];
         }
         else {
-            _navigationBar.topItem.title = [NSString stringWithFormat:@"%@ %.1lfkm", NSLocalizedString(@"word.total", nil), (_totalDistance / 1000)];
+            [cellText appendFormat:@" : %.2lfmi", (distance / 1640)];
         }
+        _totalDistance += distance;
+        fromPinNumber++;
+    }
+    
+    NSString *totalText;
+    if ([[NSUserDefaults standardUserDefaults] integerForKey:kUDDistanceUnits] == MMDistanceUnitsMeters) {
+        if (_totalDistance < 1000) {
+            totalText = [NSString stringWithFormat:@"%@ %.0lfm", NSLocalizedString(@"word.total", nil), _totalDistance];
+        }
+        else {
+            totalText = [NSString stringWithFormat:@"%@ %.1lfkm", NSLocalizedString(@"word.total", nil), (_totalDistance / 1000)];
+        }
+    }
+    else {
+        totalText = [NSString stringWithFormat:@"%@ %.2lfmi", NSLocalizedString(@"word.total", nil), (_totalDistance / 1640)];
+    }
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        _navigationBar.topItem.title = totalText;
+    }
+    else {
+        self.title = totalText;
     }
 }
 
@@ -143,7 +158,12 @@
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    return [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        return [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
+    }
+    else {
+        return [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 1)];
+    }
 }
 
 #pragma mark - IBAction

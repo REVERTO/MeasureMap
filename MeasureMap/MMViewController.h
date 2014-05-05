@@ -15,4 +15,9 @@
 @interface MMViewController : GAITrackedViewController
 <ADBannerViewDelegate, UITableViewDataSource, UITableViewDataSource,CLLocationManagerDelegate, UISplitViewControllerDelegate>
 
+@property (weak, nonatomic) IBOutlet MKMapView *mapView;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *currentButton;
+
+- (void)removeAdBanner;
+
 @end

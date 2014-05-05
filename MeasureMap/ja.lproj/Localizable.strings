@@ -26,3 +26,12 @@
 "message.nolocation" = "位置情報が取得できません";
 "message.pinDelete" = "このピンを削除する";
 "message.guidetrash" = "地図上にピンがあればこのボタンで削除することができます";
+
+//----- Alert -----
+"aleart.failRooting.title" = "ルート取得失敗";
+"aleart.failRooting.message" = "線を書き直すためにピンをドラッグするか削除する必要があります。";
+"aleart.restrictedPurchase.message" = "現在購入機能が制限されています。設定アプリから制限を解除してください。";
+"aleart.completePurchase.message" = "購入処理が完了しました。";
+"aleart.failedPurchase.message" = "購入処理に失敗しました。";
+"aleart.completeRestore.message" = "リストア処理が完了しました。";
+"aleart.failedRestore.message" = "リストア処理に失敗しました。";

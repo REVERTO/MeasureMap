@@ -26,3 +26,12 @@
 "message.nolocation" = "Location information can not be obtained";
 "message.pinDelete" = "Delete this pin";
 "message.guidetrash" = "If there are pins, you can remove all pins by this button.";
+
+//----- Alert -----
+"aleart.failRooting.title" = "Routing failed";
+"aleart.failRooting.message" = "You need drag pin or remove pin for draw line again.";
+"aleart.restrictedPurchase.message" = "You are restricted function of purchase now. Please cancel the restriction from setting app.";
+"aleart.completePurchase.message" = "Completed purchase process.";
+"aleart.failedPurchase.message" = "Failed purchase process.";
+"aleart.completeRestore.message" = "Completed restore process.";
+"aleart.failedRestore.message" = "Failed restore process.";

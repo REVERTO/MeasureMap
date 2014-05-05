@@ -11,6 +11,7 @@
 
 @interface MMListViewController : GAITrackedViewController <UITableViewDelegate>
 
-@property (weak, nonatomic) NSMutableArray *annotations;
+//@property (weak, nonatomic) NSMutableArray *annotations;
+@property (weak, nonatomic) NSArray *distances;
 
 @end
